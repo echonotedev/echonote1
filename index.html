@@ -169,7 +169,9 @@
   .folder:hover .fmenu{display:grid;}
   .folder .fmenu:hover{color:var(--sidebar-text);background:var(--sidebar-active);}
   .folder .fmenu svg{width:14px;height:14px;}
-  .folder-body{padding-left:8px;border-left:2px solid var(--sidebar-elev);margin-left:14px;}
+  .folder-body{padding-left:8px;border-left:2px solid var(--sidebar-elev);margin-left:14px;
+    max-height:1500px;overflow:hidden;transition:max-height .3s ease,opacity .2s ease;}
+  .folder-body.collapsed{max-height:0;opacity:0;border-left-color:transparent;}
   .folder-label{font-family:"JetBrains Mono",monospace;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--sidebar-muted);padding:14px 12px 4px;}
 
   /* theme swatch button in the you-card */
@@ -229,14 +231,16 @@
 
   .msg{
     align-self:flex-end;max-width:74%;position:relative;
-    animation:rise .26s cubic-bezier(.2,.8,.2,1);
   }
+  .msg.appear{animation:rise .26s cubic-bezier(.2,.8,.2,1);}
   @keyframes rise{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+  .stream{animation:streamIn .28s ease;}
+  @keyframes streamIn{from{opacity:0;}to{opacity:1;}}
   .bubble{
     background:var(--self);color:#fff;
     padding:10px 13px 8px;border-radius:16px 16px 5px 16px;
     box-shadow:0 1px 2px rgba(87,75,144,.25);
-    font-size:.93rem;line-height:1.45;word-wrap:break-word;white-space:pre-wrap;
+    font-size:.93rem;line-height:1.45;overflow-wrap:anywhere;
   }
   .bubble.pinned{box-shadow:0 0 0 2px var(--accent), 0 1px 2px rgba(87,75,144,.25);}
   .bubble a{color:#fff;text-decoration:underline;text-underline-offset:2px;}
@@ -267,7 +271,7 @@
   .quote:hover{background:rgba(255,255,255,.2);}
   .quote .qname{display:block;font-size:.68rem;font-weight:600;opacity:.85;margin-bottom:1px;}
   .quote .qtext{display:block;font-size:.8rem;opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .bodyline{min-height:.5em;}
+  .bodyline{min-height:.5em;white-space:pre-wrap;overflow-wrap:anywhere;}
 
   /* checklists */
   .todo-row{display:flex;align-items:flex-start;gap:9px;padding:3px 0;}
@@ -315,6 +319,31 @@
   .themecard:hover{border-color:var(--muted);}
   .themecard.on{border-color:var(--self);}
   .themecard .sw{width:22px;height:22px;border-radius:50%;flex:none;}
+
+  /* avatar images */
+  .you .av img, .set-av img{width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block;}
+  .you-gear{margin-left:auto;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;color:var(--sidebar-muted);flex:none;}
+  .you-gear:hover{color:var(--sidebar-text);background:var(--sidebar-active);}
+  .you-gear svg{width:17px;height:17px;}
+  .you{cursor:pointer;}
+
+  /* settings panel */
+  .set-head{display:flex;align-items:center;gap:13px;margin-bottom:18px;}
+  .set-av{width:46px;height:46px;border-radius:50%;flex:none;display:grid;place-items:center;
+    background:linear-gradient(150deg,var(--self-hi),var(--self));color:#fff;font-weight:600;overflow:hidden;}
+  .set-head h3{margin:0;}
+  .set-label{display:block;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:16px 0 7px;font-weight:600;}
+  #setName{width:100%;border:1px solid var(--line);border-radius:12px;padding:11px 14px;font-family:inherit;font-size:.95rem;outline:none;color:var(--ink);background:var(--surface);}
+  #setName:focus{border-color:var(--self);}
+  .set-note{font-size:.85rem;color:var(--muted);line-height:1.5;margin:0;}
+  .set-acct{display:flex;flex-direction:column;gap:12px;}
+  .set-acct-row{display:flex;align-items:center;gap:11px;}
+  .set-acct-row b{display:block;font-size:.88rem;}
+  .set-acct-row span{font-size:.8rem;color:var(--muted);}
+  .set-acct .dot{width:9px;height:9px;border-radius:50%;flex:none;}
+  .set-acct .dot.ok{background:#3F9E6E;box-shadow:0 0 0 3px rgba(63,158,110,.18);}
+  .set-acct .go.danger{width:100%;background:var(--danger);color:#fff;}
+  .set-acct .go.danger:hover{filter:brightness(1.05);}
   input[type="datetime-local"]{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-family:inherit;font-size:.95rem;outline:none;color:var(--ink);background:var(--surface);}
 
   .ghosted{background:var(--sidebar-elev)!important;}
@@ -419,7 +448,8 @@
   /* ---------- Modal ---------- */
   .scrim{position:fixed;inset:0;background:rgba(27,23,38,.45);display:none;align-items:center;justify-content:center;z-index:50;padding:20px;backdrop-filter:blur(2px);}
   .scrim.on{display:flex;}
-  .dialog{background:var(--surface);border-radius:20px;padding:24px;width:100%;max-width:380px;box-shadow:0 24px 60px rgba(27,23,38,.35);}
+  .dialog{background:var(--surface);border-radius:20px;padding:24px;width:100%;max-width:380px;box-shadow:0 24px 60px rgba(27,23,38,.35);animation:dialogIn .2s cubic-bezier(.2,.8,.2,1);}
+  @keyframes dialogIn{from{opacity:0;transform:translateY(10px) scale(.98);}to{opacity:1;transform:none;}}
   .dialog h3{font-family:"Bricolage Grotesque",sans-serif;font-size:1.2rem;margin:0 0 6px;}
   .dialog p{font-size:.86rem;color:var(--muted);margin:0 0 18px;line-height:1.5;}
   .dialog input{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-family:inherit;font-size:.95rem;outline:none;}
@@ -464,13 +494,15 @@
       </button>
     </div>
 
-    <div class="you">
+    <div class="you" id="youCard" title="Settings">
       <div class="av" id="youAv">Y</div>
       <div class="meta">
         <b id="youName">You</b>
         <span id="youState">Local on this device</span>
       </div>
-      <button class="you-theme" id="themeBtn" title="Colour scheme"></button>
+      <span class="you-gear" id="settingsBtn" title="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+      </span>
     </div>
 
     <div class="side-tools">
@@ -510,10 +542,18 @@
    ============================================================ */
 
 const CONFIG = {
-  STORAGE_MODE: 'cloud',
-  SUPABASE_URL: 'https://rqsncuivcowlniftpmsp.supabase.co',   // Step 2
-  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJxc25jdWl2Y293bG5pZnRwbXNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3NjY1NjgsImV4cCI6MjA5ODM0MjU2OH0.isIIK6ZnLfyZbUyv60Hb_OrV_KVA7_xbCvgIPqDab4w',                // Step 2
-  GOOGLE_CLIENT_ID: '',                       // leave blank in cloud mode
+  // 'local'  = this device only (no account, no sync)
+  // 'cloud'  = Supabase login + index/text  +  Google Drive file vault   <-- the cross-device setup
+  STORAGE_MODE: 'local',
+
+  // --- Supabase (identity + the lightweight index of threads/messages) ---
+  SUPABASE_URL: '',               // e.g. https://xxxx.supabase.co
+  SUPABASE_ANON_KEY: '',          // the public anon key (safe to ship in frontend)
+
+  // --- Google Drive (the file vault for attachments & voice notes) ---
+  // In cloud mode the Drive access token comes from your Supabase Google login,
+  // so there is ONE sign-in. Add the Drive scope in Supabase → Auth → Google.
+  GOOGLE_CLIENT_ID: '',           // only needed for standalone 'drive' mode (no Supabase)
   DRIVE_STATE_FILE: 'echo-data.json',
 };
 
@@ -710,6 +750,7 @@ const CloudStore = (() => {
       return URL.createObjectURL(await r.blob());
     },
     async signOut(){ if(sb)await sb.auth.signOut(); location.reload(); },
+    getProfile(){ return user? {email:user.email, name:user.user_metadata?.full_name||user.user_metadata?.name||'', avatar:user.user_metadata?.avatar_url||''} : null; },
   };
 })();
 
@@ -750,30 +791,46 @@ function dayLabel(ts){
 }
 
 /* ---------- state ---------- */
-let state = { threads:[], messages:{}, folders:[], theme:'plum', activeId:null };
+let state = { threads:[], messages:{}, folders:[], theme:'plum', displayName:'', avatarUrl:'', activeId:null };
 let pending = [];           // staged attachments before send
 let stagedQuote = null;     // {threadId,msgId,snippet,name} staged in composer
 let findTerm = '';
 let saveTimer = null;
 
-function persist(){ clearTimeout(saveTimer); saveTimer=setTimeout(()=>Store.save({threads:state.threads,messages:state.messages,folders:state.folders,theme:state.theme}),250); }
+function persist(){ clearTimeout(saveTimer); saveTimer=setTimeout(()=>Store.save({threads:state.threads,messages:state.messages,folders:state.folders,theme:state.theme,displayName:state.displayName,avatarUrl:state.avatarUrl}),250); }
 
+let account=null;   // {email,name,avatar} when signed in via cloud
 async function boot(){
   try{
     if(Store.name==='drive'){ $('#modeTag').textContent='Google Drive sync'; $('#youState').textContent='Syncing via Drive'; }
     if(Store.name==='cloud'){ $('#modeTag').textContent='Synced'; $('#youState').textContent='Supabase + Drive'; }
     const data = await Store.load();
-    if(data){ state.threads=data.threads||[]; state.messages=data.messages||{}; state.folders=data.folders||[]; state.theme=data.theme||'plum'; }
+    if(data){ state.threads=data.threads||[]; state.messages=data.messages||{}; state.folders=data.folders||[]; state.theme=data.theme||'plum'; state.displayName=data.displayName||''; state.avatarUrl=data.avatarUrl||''; }
+    account = Store.getProfile ? Store.getProfile() : null;
+    if(account){
+      if(!state.displayName) state.displayName=account.name||'';
+      if(!state.avatarUrl) state.avatarUrl=account.avatar||'';
+    }
   }catch(e){
     console.warn('load failed',e);
     $('#youState').textContent='Drive unavailable — check setup';
   }
   if(!state.threads.length){ seed(); }
   applyTheme(state.theme);
+  renderAccount();
   scheduleReminders();
   requestNotifyIfNeeded();
   state.activeId = state.threads[0]?.id || null;
   renderThreads(); renderMain();
+}
+
+function renderAccount(){
+  const name = state.displayName || 'You';
+  $('#youName').textContent = name;
+  const av=$('#youAv');
+  if(state.avatarUrl){ av.innerHTML=`<img src="${esc(state.avatarUrl)}" alt="">`; }
+  else { av.textContent = initials(name); }
+  if(account){ $('#youState').textContent = account.email; }
 }
 
 function seed(){
@@ -821,7 +878,7 @@ function renderThreads(){
       <span class="fcount">${inF.length}</span>
       <button class="fmenu" data-fmenu="${f.id}" title="Folder options">${I.more}</button>
     </div>`;
-    if(!f.collapsed) html+=`<div class="folder-body">${inF.map(threadRow).join('')}</div>`;
+    html+=`<div class="folder-body ${f.collapsed?'collapsed':''}" data-fbody="${f.id}">${inF.map(threadRow).join('')}</div>`;
   });
   // ungrouped threads
   const loose=sortT(state.threads.filter(t=>!t.folderId && match(t)));
@@ -833,7 +890,15 @@ function renderThreads(){
   list.innerHTML=html;
   list.querySelectorAll('.thread').forEach(el=>el.onclick=e=>{ if(e.target.closest('.thread-pin'))return; openThread(el.dataset.id); });
   list.querySelectorAll('.thread-pin').forEach(b=>b.onclick=e=>{ e.stopPropagation(); toggleThreadPin(b.dataset.pin); });
-  list.querySelectorAll('.folder').forEach(el=>el.onclick=e=>{ if(e.target.closest('.fmenu'))return; const f=state.folders.find(x=>x.id===el.dataset.folder); if(f){f.collapsed=!f.collapsed; renderThreads(); persist();} });
+  list.querySelectorAll('.folder').forEach(el=>el.onclick=e=>{
+    if(e.target.closest('.fmenu'))return;
+    const f=state.folders.find(x=>x.id===el.dataset.folder); if(!f)return;
+    f.collapsed=!f.collapsed;
+    el.classList.toggle('collapsed',f.collapsed);                                  // animate via class, no rebuild
+    const body=list.querySelector(`.folder-body[data-fbody="${f.id}"]`);
+    if(body)body.classList.toggle('collapsed',f.collapsed);
+    persist();
+  });
   list.querySelectorAll('.fmenu').forEach(b=>b.onclick=e=>{ e.stopPropagation(); folderMenu(state.folders.find(x=>x.id===b.dataset.fmenu)); });
 }
 function toggleThreadPin(id){ const t=state.threads.find(x=>x.id===id); if(t){t.pinned=!t.pinned; renderThreads(); persist();} }
@@ -1129,6 +1194,7 @@ async function doSend(){
   const t=state.threads.find(x=>x.id===state.activeId); if(t)t.lastActivity=Date.now();
   pending=[]; input.value=''; input.style.height='auto';
   renderStream(); renderPending(); renderThreads(); persist();
+  const last=document.querySelector('#stream .msg:last-child'); if(last)last.classList.add('appear');
   $('#sendBtn').disabled=true;
 }
 
@@ -1339,18 +1405,41 @@ function applyTheme(key){
   document.body.classList.toggle('dark', !!t.dark);
   const btn=$('#themeBtn'); if(btn)btn.style.background=t.swatch;
 }
-$('#themeBtn').onclick=()=>{
+function openSettings(){
   const d=$('#dialog');
-  d.innerHTML=`<h3>Colour scheme</h3><p>Pick a palette. It syncs with your notes.</p>
+  const signedIn=!!account;
+  const acctHtml = Store.name==='cloud'
+    ? (signedIn
+        ? `<div class="set-acct">
+             <div class="set-acct-row"><span class="dot ok"></span><div><b>Signed in with Google</b><span>${esc(account.email)}</span></div></div>
+             <button class="go danger" id="setLogout">Log out</button>
+           </div>`
+        : `<p class="set-note">Not signed in.</p>`)
+    : `<p class="set-note">Running locally on this device. Sign-in and cross-device sync are available in cloud mode.</p>`;
+
+  d.innerHTML=`<div class="set-head">
+      <div class="set-av">${state.avatarUrl?`<img src="${esc(state.avatarUrl)}" alt="">`:esc(initials(state.displayName||'You'))}</div>
+      <h3>Settings</h3>
+    </div>
+    <label class="set-label">Display name</label>
+    <input id="setName" value="${esc(state.displayName||'')}" placeholder="${esc(account?.name||'You')}">
+    <label class="set-label">Colour scheme</label>
     <div class="themegrid">${Object.entries(THEMES).map(([k,t])=>`
       <button class="themecard ${k===state.theme?'on':''}" data-theme="${k}">
         <span class="sw" style="background:${t.swatch}"></span>${esc(t.label)}
       </button>`).join('')}</div>
-    <div class="btns"><button class="ghost" id="dlgCancel">Done</button></div>`;
+    <label class="set-label">Account</label>
+    ${acctHtml}
+    <div class="btns"><button class="go" id="setDone">Done</button></div>`;
   $('#scrim').classList.add('on');
   d.querySelectorAll('.themecard').forEach(b=>b.onclick=()=>{ state.theme=b.dataset.theme; applyTheme(state.theme); persist(); d.querySelectorAll('.themecard').forEach(x=>x.classList.toggle('on',x===b)); });
-  $('#dlgCancel').onclick=closeDialog;
-};
+  const saveName=()=>{ const v=$('#setName').value.trim(); state.displayName=v; renderAccount(); persist(); };
+  $('#setName').oninput=saveName;
+  const lo=$('#setLogout'); if(lo)lo.onclick=async()=>{ closeDialog(); try{ await Store.signOut(); }catch(e){ alert('Logout failed: '+e.message); } };
+  $('#setDone').onclick=()=>{ saveName(); closeDialog(); };
+}
+$('#settingsBtn').onclick=e=>{ e.stopPropagation(); openSettings(); };
+$('#youCard').onclick=()=>openSettings();
 
 $('#newThread').onclick=()=>dialog({
   title:'New thread', hint:'Name it for what goes inside — “Reading list”, “Tax 2026”, “Random”.',
