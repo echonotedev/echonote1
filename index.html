@@ -544,11 +544,11 @@
 const CONFIG = {
   // 'local'  = this device only (no account, no sync)
   // 'cloud'  = Supabase login + index/text  +  Google Drive file vault   <-- the cross-device setup
-  STORAGE_MODE: 'local',
+  STORAGE_MODE: 'cloud',
 
   // --- Supabase (identity + the lightweight index of threads/messages) ---
-  SUPABASE_URL: '',               // e.g. https://xxxx.supabase.co
-  SUPABASE_ANON_KEY: '',          // the public anon key (safe to ship in frontend)
+  SUPABASE_URL: 'https://rqsncuivcowlniftpmsp.supabase.co',               // e.g. https://xxxx.supabase.co
+  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJxc25jdWl2Y293bG5pZnRwbXNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3NjY1NjgsImV4cCI6MjA5ODM0MjU2OH0.isIIK6ZnLfyZbUyv60Hb_OrV_KVA7_xbCvgIPqDab4w',          // the public anon key (safe to ship in frontend)
 
   // --- Google Drive (the file vault for attachments & voice notes) ---
   // In cloud mode the Drive access token comes from your Supabase Google login,
