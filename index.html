@@ -91,6 +91,21 @@
   }
   .toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
 
+  /* image lightbox */
+  .lightbox{position:fixed;inset:0;z-index:100;display:grid;place-items:center;
+    background:rgba(15,12,22,.86);backdrop-filter:blur(3px);padding:24px;
+    opacity:0;transition:opacity .18s ease;cursor:zoom-out;}
+  .lightbox.on{opacity:1;}
+  .lightbox img{max-width:100%;max-height:100%;border-radius:10px;
+    box-shadow:0 24px 70px rgba(0,0,0,.5);cursor:default;
+    transform:scale(.97);transition:transform .18s ease;}
+  .lightbox.on img{transform:scale(1);}
+  .lb-close{position:fixed;top:calc(16px + env(safe-area-inset-top));right:16px;
+    width:42px;height:42px;border-radius:50%;display:grid;place-items:center;
+    color:#fff;background:rgba(255,255,255,.16);}
+  .lb-close:hover{background:rgba(255,255,255,.28);}
+  .lb-close svg{width:22px;height:22px;}
+
   .you{
     margin:2px 14px 12px;padding:10px 12px;border-radius:13px;
     background:var(--sidebar-elev);
@@ -219,7 +234,7 @@
   .find input{flex:1;border:none;outline:none;background:none;font-size:.9rem;color:var(--ink);}
 
   .stream{
-    flex:1;overflow-y:auto;padding:24px 20px 8px;min-height:0;
+    flex:1;overflow-y:auto;overflow-x:hidden;padding:24px 20px 8px;min-height:0;
     display:flex;flex-direction:column;gap:3px;
     background:
       radial-gradient(circle at 1px 1px, rgba(87,75,144,.045) 1px, transparent 0) 0 0/22px 22px;
@@ -264,6 +279,42 @@
   .att .ai b{display:block;font-size:.82rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .att .ai span{font-size:.68rem;opacity:.8;font-family:"JetBrains Mono",monospace;}
   .att img.thumb{width:100%;border-radius:9px;margin-top:7px;display:block;max-height:280px;object-fit:cover;}
+
+  /* clean inline image attachment (no file-card chrome) */
+  .att.image{padding:0;background:transparent;display:block;position:relative;margin-top:7px;cursor:pointer;}
+  .att.image .imgwrap{border-radius:12px;overflow:hidden;max-width:280px;}
+  .att.image img.thumb{margin:0;max-height:320px;width:100%;}
+  .att.image:hover{opacity:.95;}
+
+  /* upload spinner overlay */
+  .att{position:relative;}
+  .uploading{position:absolute;inset:0;display:grid;place-items:center;background:rgba(27,23,38,.28);border-radius:12px;}
+  .ring{width:26px;height:26px;border-radius:50%;border:3px solid rgba(255,255,255,.4);border-top-color:#fff;animation:spin .8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* batch selection */
+  .topbar.selbar{background:var(--self);color:#fff;}
+  .topbar.selbar .icon-btn{color:#fff;}
+  .topbar.selbar .icon-btn:hover{background:rgba(255,255,255,.16);}
+  .topbar.selbar .icon-btn.danger:hover{background:rgba(255,255,255,.16);color:#fff;}
+  .msg.selectable{cursor:pointer;}
+  .msg.selectable .bubble{transition:transform .1s;}
+  .msg.selected .bubble{box-shadow:0 0 0 3px var(--accent);}
+  .selbox{position:absolute;top:50%;left:-30px;transform:translateY(-50%);
+    width:22px;height:22px;border-radius:50%;border:2px solid var(--muted);
+    display:grid;place-items:center;color:#fff;background:var(--surface);}
+  .msg.selected .selbox{background:var(--self);border-color:var(--self);}
+  .selbox svg{width:13px;height:13px;}
+  .app.show-thread .composer{} /* composer visible normally */
+  .selbar ~ .composer{display:none;}   /* hide composer while selecting */
+
+  /* read-aloud stop pill */
+  .tts-pill{position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(20px);
+    display:none;align-items:center;gap:8px;background:var(--ink);color:#fff;
+    padding:10px 16px;border-radius:22px;font-size:.85rem;box-shadow:0 12px 30px rgba(27,23,38,.35);z-index:80;}
+  .tts-pill.on{display:flex;animation:pillUp .2s ease;}
+  @keyframes pillUp{from{opacity:0;transform:translateX(-50%) translateY(20px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+  .tts-pill svg{width:15px;height:15px;}
 
   /* in-bubble quote (reply / cross-thread) */
   .quote{display:block;border-left:3px solid rgba(255,255,255,.55);background:rgba(255,255,255,.13);
@@ -325,7 +376,7 @@
   .you-gear{margin-left:auto;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;color:var(--sidebar-muted);flex:none;}
   .you-gear:hover{color:var(--sidebar-text);background:var(--sidebar-active);}
   .you-gear svg{width:17px;height:17px;}
-  .you{cursor:pointer;}
+  .you{cursor:pointer;margin-top:auto;}
 
   /* settings panel */
   .set-head{display:flex;align-items:center;gap:13px;margin-bottom:18px;}
@@ -384,6 +435,7 @@
   .composer{
     padding:14px 20px calc(14px + env(safe-area-inset-bottom));
     background:var(--surface);border-top:1px solid var(--line);
+    max-width:100%;
   }
   .pending{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
   .pending:empty{display:none;}
@@ -397,16 +449,19 @@
   .chip .x{margin-left:2px;color:var(--muted);font-size:1rem;line-height:1;padding:2px;}
   .chip .x:hover{color:var(--danger);}
 
-  .inbar{display:flex;align-items:flex-end;gap:10px;}
-  .attach,.send{width:44px;height:44px;border-radius:13px;flex:none;display:grid;place-items:center;transition:background .15s,transform .1s;}
+  .inbar{display:flex;align-items:flex-end;gap:7px;min-width:0;}
+  .attach,.send{width:42px;height:42px;border-radius:13px;flex:none;display:grid;place-items:center;transition:background .15s,transform .1s;}
   .attach{color:var(--muted);}
   .attach:hover{background:var(--paper);color:var(--self);}
-  .attach svg{width:21px;height:21px;}
-  .field{flex:1;}
+  .attach svg{width:20px;height:20px;}
+  #checkBtn:hover{color:var(--self);}
+  .field{flex:1;min-width:0;}
   .field textarea{
-    width:100%;resize:none;border:1px solid var(--line);background:var(--paper);
+    display:block;width:100%;max-width:100%;box-sizing:border-box;
+    resize:none;border:1px solid var(--line);background:var(--paper);
     border-radius:15px;padding:12px 15px;font-family:inherit;font-size:.94rem;
-    color:var(--ink);line-height:1.45;max-height:160px;outline:none;transition:border-color .15s;
+    color:var(--ink);line-height:1.45;max-height:160px;outline:none;overflow-y:hidden;
+    transition:border-color .15s;
   }
   .field textarea:focus{border-color:var(--self);}
   .field textarea::placeholder{color:var(--muted);}
@@ -494,17 +549,6 @@
       </button>
     </div>
 
-    <div class="you" id="youCard" title="Settings">
-      <div class="av" id="youAv">Y</div>
-      <div class="meta">
-        <b id="youName">You</b>
-        <span id="youState">Local on this device</span>
-      </div>
-      <span class="you-gear" id="settingsBtn" title="Settings">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
-      </span>
-    </div>
-
     <div class="side-tools">
       <div class="search">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
@@ -519,7 +563,19 @@
     </div>
 
     <div class="threads" id="threadList"></div>
+
+    <div class="you" id="youCard" title="Settings">
+      <div class="av" id="youAv">Y</div>
+      <div class="meta">
+        <b id="youName">You</b>
+        <span id="youState">Local on this device</span>
+      </div>
+      <span class="you-gear" id="settingsBtn" title="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+      </span>
+    </div>
   </aside>
+
 
   <!-- Main -->
   <main class="main" id="main"></main>
@@ -544,11 +600,11 @@
 const CONFIG = {
   // 'local'  = this device only (no account, no sync)
   // 'cloud'  = Supabase login + index/text  +  Google Drive file vault   <-- the cross-device setup
-  STORAGE_MODE: 'cloud',
+  STORAGE_MODE: 'local',
 
   // --- Supabase (identity + the lightweight index of threads/messages) ---
-  SUPABASE_URL: 'https://rqsncuivcowlniftpmsp.supabase.co',               // e.g. https://xxxx.supabase.co
-  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJxc25jdWl2Y293bG5pZnRwbXNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3NjY1NjgsImV4cCI6MjA5ODM0MjU2OH0.isIIK6ZnLfyZbUyv60Hb_OrV_KVA7_xbCvgIPqDab4w',          // the public anon key (safe to ship in frontend)
+  SUPABASE_URL: '',               // e.g. https://xxxx.supabase.co
+  SUPABASE_ANON_KEY: '',          // the public anon key (safe to ship in frontend)
 
   // --- Google Drive (the file vault for attachments & voice notes) ---
   // In cloud mode the Drive access token comes from your Supabase Google login,
@@ -680,7 +736,7 @@ const DriveStore = (() => {
 // Google Drive holds the heavy files. The Drive token rides along from the Supabase
 // Google login, so there is a single sign-in. Blueprint — verify with your own project.
 const CloudStore = (() => {
-  let sb=null, user=null, driveToken=null, ready=false, refreshing=null;
+  let sb=null, user=null, driveToken=null, ready=false, refreshing=null, lastSavedJSON=null;
   function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
   async function refreshDriveToken(){
     // Asks the Supabase Edge Function to mint a fresh Google token from the stored refresh token.
@@ -718,6 +774,10 @@ const CloudStore = (() => {
       }
       user=session.user;
       driveToken=session.provider_token||null;
+      // Scrub the tokens out of the address bar / history once the session is captured.
+      if(location.hash && location.hash.includes('access_token')){
+        history.replaceState(null,'',location.pathname+location.search);
+      }
       // Stash the refresh token (server-only thereafter) so the Edge Function can renew Drive access.
       if(session.provider_refresh_token){
         try{ await sb.from('echo_google_tokens').upsert({user_id:user.id,refresh_token:session.provider_refresh_token}); }catch(e){ console.warn('token store failed',e); }
@@ -732,8 +792,21 @@ const CloudStore = (() => {
     },
     async save(data){
       await this.init(); if(!ready)return;
+      lastSavedJSON=JSON.stringify(data);                 // remember our own write to ignore its echo
       const {error}=await sb.from('echo_state').upsert({user_id:user.id,state:data,updated_at:new Date().toISOString()});
       if(error)console.warn('cloud save failed',error);
+    },
+    // Live updates from another device. cb(remoteState) fires when the row changes elsewhere.
+    onRemoteChange(cb){
+      if(!sb||!user)return;
+      sb.channel('echo-state-'+user.id)
+        .on('postgres_changes',{event:'*',schema:'public',table:'echo_state',filter:'user_id=eq.'+user.id},payload=>{
+          const incoming=payload.new?.state; if(!incoming)return;
+          const j=JSON.stringify(incoming);
+          if(j===lastSavedJSON)return;                    // this is the echo of our own save — ignore
+          cb(incoming);
+        })
+        .subscribe();
     },
     async putFile(file){
       await this.init();
@@ -794,10 +867,24 @@ function dayLabel(ts){
 let state = { threads:[], messages:{}, folders:[], theme:'plum', displayName:'', avatarUrl:'', activeId:null };
 let pending = [];           // staged attachments before send
 let stagedQuote = null;     // {threadId,msgId,snippet,name} staged in composer
+let selectMode = false;     // batch-select mode
+let selected = new Set();   // selected message ids
 let findTerm = '';
 let saveTimer = null;
 
-function persist(){ clearTimeout(saveTimer); saveTimer=setTimeout(()=>Store.save({threads:state.threads,messages:state.messages,folders:state.folders,theme:state.theme,displayName:state.displayName,avatarUrl:state.avatarUrl}),250); }
+function cleanForSave(){
+  const messages={};
+  for(const [tid,arr] of Object.entries(state.messages)){
+    messages[tid]=arr.map(m=>({
+      ...m,
+      attachments:(m.attachments||[])
+        .filter(a=>a.ref && !a.uploading)          // hold back until the Drive ref exists
+        .map(a=>({name:a.name,size:a.size,type:a.type,dur:a.dur||0,ref:a.ref})),
+    }));
+  }
+  return {threads:state.threads,messages,folders:state.folders,theme:state.theme,displayName:state.displayName,avatarUrl:state.avatarUrl};
+}
+function persist(){ clearTimeout(saveTimer); saveTimer=setTimeout(()=>Store.save(cleanForSave()),250); }
 
 let account=null;   // {email,name,avatar} when signed in via cloud
 async function boot(){
@@ -822,6 +909,34 @@ async function boot(){
   requestNotifyIfNeeded();
   state.activeId = state.threads[0]?.id || null;
   renderThreads(); renderMain();
+
+  // live cross-device sync
+  if(Store.onRemoteChange){
+    Store.onRemoteChange(remote=>applyRemote(remote));
+  }
+}
+
+// Merge in a state change pushed from another device, without disturbing what you're typing.
+function applyRemote(remote){
+  if(!remote)return;
+  const draft = $('#input')?.value || '';
+  state.threads = remote.threads||[];
+  state.folders = remote.folders||[];
+  if(remote.theme && remote.theme!==state.theme){ state.theme=remote.theme; applyTheme(state.theme); }
+  if(remote.displayName!==undefined) state.displayName=remote.displayName;
+  if(remote.avatarUrl!==undefined) state.avatarUrl=remote.avatarUrl;
+  // preserve any attachments still uploading locally; otherwise take remote messages
+  state.messages = remote.messages||{};
+  renderAccount();
+  scheduleReminders();
+  if(selectMode){ renderThreads(); return; }                 // don't yank a selection out from under you
+  if(state.activeId && !state.threads.find(t=>t.id===state.activeId)){
+    state.activeId = state.threads[0]?.id || null;
+    renderThreads(); renderMain(); return;
+  }
+  renderThreads(); renderStream();
+  const input=$('#input'); if(input && draft){ input.value=draft; }   // keep your in-progress message
+  toast('Synced');
 }
 
 function renderAccount(){
@@ -912,14 +1027,22 @@ function renderMain(){
     return;
   }
   const t = state.threads.find(x=>x.id===state.activeId);
+  const topbar = selectMode
+    ? `<div class="topbar selbar">
+         <button class="icon-btn" id="selCancel" title="Cancel">${I.close}</button>
+         <div class="ttl"><h2>${selected.size} selected</h2></div>
+         <button class="icon-btn" id="selForward" title="Forward to another thread">${I.quote}</button>
+         <button class="icon-btn danger" id="selDelete" title="Delete selected">${I.trash}</button>
+       </div>`
+    : `<div class="topbar">
+         <button class="back" id="backBtn">${I.back}</button>
+         <div class="tav" style="background:${colorFor(t.id)}">${esc(initials(t.name))}</div>
+         <div class="ttl"><h2>${esc(t.name)}</h2><div class="note" id="subEdit">${t.subtitle?esc(t.subtitle):'add a subtitle…'}</div></div>
+         <button class="icon-btn" id="findBtn" title="Find in thread">${I.find}</button>
+         <button class="icon-btn" id="menuBtn" title="Thread options">${I.more}</button>
+       </div>`;
   main.innerHTML = `
-    <div class="topbar">
-      <button class="back" id="backBtn">${I.back}</button>
-      <div class="tav" style="background:${colorFor(t.id)}">${esc(initials(t.name))}</div>
-      <div class="ttl"><h2>${esc(t.name)}</h2><div class="note">a thread to yourself</div></div>
-      <button class="icon-btn" id="findBtn" title="Find in thread">${I.find}</button>
-      <button class="icon-btn" id="menuBtn" title="Thread options">${I.more}</button>
-    </div>
+    ${topbar}
     <div class="find" id="findBar">${I.find}<input id="findInput" placeholder="Find in this thread" autocomplete="off"></div>
     <div class="stream" id="stream"></div>
     <div class="composer">
@@ -927,6 +1050,7 @@ function renderMain(){
       <div class="pending" id="pending"></div>
       <div class="inbar" id="inbar">
         <button class="attach" id="attachBtn" title="Attach files">${I.clip}</button>
+        <button class="attach" id="checkBtn" title="Add a checklist item">${I.check}</button>
         <button class="attach" id="recBtn" title="Record voice note">${I.mic}</button>
         <div class="field"><textarea id="input" rows="1" placeholder="Message yourself…"></textarea></div>
         <button class="send" id="sendBtn" disabled>${I.send}</button>
@@ -934,18 +1058,39 @@ function renderMain(){
     </div>`;
   renderStream(); renderPending(); renderReplyBar();
 
+  if(selectMode){
+    $('#selCancel').onclick=exitSelect;
+    $('#selForward').onclick=forwardSelected;
+    $('#selDelete').onclick=deleteSelected;
+    return;   // composer hidden via CSS in select mode; skip its wiring
+  }
+
   $('#backBtn').onclick=()=>$('#app').classList.remove('show-thread');
   $('#menuBtn').onclick=()=>threadMenu(t);
+  $('#subEdit').onclick=()=>editSubtitle(t);
   $('#findBtn').onclick=()=>{const b=$('#findBar');b.classList.toggle('on');if(b.classList.contains('on'))$('#findInput').focus();else{findTerm='';renderStream();}};
   $('#findInput').oninput=e=>{findTerm=e.target.value.trim().toLowerCase();renderStream();};
   $('#attachBtn').onclick=()=>$('#filePick').click();
   $('#recBtn').onclick=startRecording;
 
   const input=$('#input'), send=$('#sendBtn');
-  const refresh=()=>{send.disabled = !input.value.trim() && !pending.length && !stagedQuote; input.style.height='auto'; input.style.height=Math.min(input.scrollHeight,160)+'px';};
+  const refresh=()=>{
+    send.disabled = !input.value.trim() && !pending.length && !stagedQuote;
+    input.style.height='auto';
+    const h=Math.min(input.scrollHeight,160);
+    input.style.height=h+'px';
+    input.style.overflowY = input.scrollHeight>160 ? 'auto' : 'hidden';
+  };
   input.oninput=refresh;
   input.onkeydown=e=>{ if(e.key==='Enter' && !e.shiftKey && !isTouch()){ e.preventDefault(); doSend(); } };
   send.onclick=doSend;
+  $('#checkBtn').onclick=()=>insertChecklistItem(input,refresh);
+  // paste images straight into the thread
+  input.onpaste=e=>{
+    const items=[...(e.clipboardData?.items||[])];
+    const imgs=items.filter(it=>it.kind==='file' && it.type.startsWith('image/'));
+    if(imgs.length){ e.preventDefault(); imgs.forEach(it=>{const f=it.getAsFile(); if(f){pending.push(f);} }); renderPending(); refresh(); toast(imgs.length+' image'+(imgs.length>1?'s':'')+' attached'); }
+  };
   refresh();
 }
 
@@ -961,8 +1106,9 @@ function renderStream(){
   view.forEach(m=>{
     const dl=dayLabel(m.ts);
     if(dl!==lastDay && !findTerm){ html+=`<div class="daysep">${dl}</div>`; lastDay=dl; }
-    html+=`<div class="msg" data-id="${m.id}">
-      <div class="acts"><button class="morebtn" title="Message actions">${I.more}</button></div>
+    const sel = selected.has(m.id);
+    html+=`<div class="msg ${selectMode?'selectable':''} ${sel?'selected':''}" data-id="${m.id}">
+      ${selectMode?`<span class="selbox">${sel?I.check:''}</span>`:`<div class="acts"><button class="morebtn" title="Message actions">${I.more}</button></div>`}
       <div class="bubble ${m.pinned?'pinned':''}">
         ${m.quote?quoteHtml(m.quote):''}
         ${m.text?`<div class="txt">${renderBody(m.text,m.id)}</div>`:''}
@@ -976,6 +1122,10 @@ function renderStream(){
   // wire actions + lazy attachment urls
   wrap.querySelectorAll('.msg').forEach(el=>{
     const id=el.dataset.id;
+    if(selectMode){
+      el.onclick=ev=>{ if(ev.target.closest('a'))return; toggleSelect(id); };
+      return;
+    }
     const menuItems=()=>{
       const m=findMsg(id); if(!m)return [];
       const items=[
@@ -988,6 +1138,7 @@ function renderStream(){
         items.push({label:'Read aloud', icon:I.speaker, run:()=>speak(m.text)});
         items.push({label:'Copy text', icon:I.copy, run:()=>{navigator.clipboard?.writeText(m.text);toast('Copied');}});
       }
+      items.push({label:'Select', icon:I.check, run:()=>enterSelect(id)});
       items.push({sep:true});
       items.push({label:'Delete', icon:I.trash, danger:true, run:()=>deleteMsg(id)});
       return items;
@@ -996,18 +1147,26 @@ function renderStream(){
     const rx=el.querySelector('.remind-x'); if(rx)rx.onclick=e=>{e.stopPropagation();clearReminder(id);};
     el.querySelectorAll('.todo').forEach(box=>box.onclick=()=>toggleTodo(id,+box.dataset.line));
     const q=el.querySelector('.quote'); if(q&&q.dataset.tid)q.onclick=()=>jumpTo(q.dataset.tid,q.dataset.mid);
-    // touch: a tap on the bubble opens the action menu directly (no hover on touch)
     if(isTouch()){
       el.querySelector('.bubble').onclick=ev=>{
-        if(ev.target.closest('a,.todo,.quote,.remind-x'))return;
+        if(ev.target.closest('a,.todo,.quote,.remind-x,.att'))return;
         openActionMenu(el.querySelector('.bubble'), menuItems());
       };
     }
   });
-  wrap.querySelectorAll('.att[data-ref]').forEach(el=>{
-    if(el.dataset.audio==='1'){ initAudioPlayer(el); return; }   // audio handled separately
-    el.onclick=async()=>{ try{ const url=await Store.fileUrl(el.dataset.ref); window.open(url,'_blank'); }catch(e){ alert('Could not open file: '+e.message); } };
-    if(el.dataset.img==='1'){ Store.fileUrl(el.dataset.ref).then(url=>{const img=document.createElement('img');img.className='thumb';img.src=url;el.appendChild(img);}).catch(()=>{}); }
+  // attachments: inline images, audio players, file cards, upload spinners
+  wrap.querySelectorAll('.att').forEach(el=>{
+    if(el.dataset.uploading==='1') return;               // spinner shown; nothing to wire yet
+    if(el.dataset.audio==='1'){ initAudioPlayer(el); return; }
+    const ref=el.dataset.ref, local=el.dataset.local;
+    if(el.dataset.img==='1'){
+      const src=local || null;
+      const setImg=url=>{ const img=document.createElement('img'); img.className='thumb'; img.src=url; el.querySelector('.imgwrap').appendChild(img); };
+      if(src){ setImg(src); } else if(ref){ Store.fileUrl(ref).then(setImg).catch(()=>{}); }
+      el.onclick=async()=>{ try{ const url=local||await Store.fileUrl(ref); openLightbox(url); }catch(e){ toast('Could not open image: '+e.message); } };
+    } else if(ref){
+      el.onclick=async()=>{ try{ const url=local||await Store.fileUrl(ref); openFile(url, el.dataset.name, el.dataset.mime); }catch(e){ toast('Could not open file: '+e.message); } };
+    }
   });
   if(!findTerm) wrap.scrollTop=wrap.scrollHeight;
 }
@@ -1037,6 +1196,36 @@ function quoteHtml(q){
   </div>`;
 }
 
+/* ---------- open a non-image file ---------- */
+// In the Android app a native bridge downloads the file and opens it with a system app.
+// On the web it opens in a new browser tab (the normal viewer/download behaviour).
+function blobToBase64(blob){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(String(r.result).split(',')[1]); r.onerror=rej; r.readAsDataURL(blob); }); }
+async function openFile(url, name, mime){
+  if(window.AndroidBridge && typeof window.AndroidBridge.saveAndOpen==='function'){
+    try{
+      const blob=await (await fetch(url)).blob();
+      const b64=await blobToBase64(blob);
+      window.AndroidBridge.saveAndOpen(b64, name||'file', mime||blob.type||'application/octet-stream');
+    }catch(e){ toast('Could not open file'); }
+  } else {
+    window.open(url,'_blank');
+  }
+}
+
+/* ---------- image lightbox ---------- */
+function openLightbox(url){
+  closeLightbox();
+  const box=document.createElement('div'); box.className='lightbox'; box.id='lightbox';
+  box.innerHTML=`<button class="lb-close" title="Close">${I.close}</button><img src="${esc(url)}" alt="">`;
+  document.body.appendChild(box);
+  requestAnimationFrame(()=>box.classList.add('on'));
+  const close=e=>{ if(!e || e.target===box || e.target.closest('.lb-close')) closeLightbox(); };
+  box.onclick=close;
+  document.addEventListener('keydown',onLightboxKey,true);
+}
+function onLightboxKey(e){ if(e.key==='Escape') closeLightbox(); }
+function closeLightbox(){ const b=$('#lightbox'); if(b){ b.remove(); document.removeEventListener('keydown',onLightboxKey,true); } }
+
 /* ---------- anchored action menu (one ⋯ per message) ---------- */
 let openMenuEl=null;
 function closeActionMenu(){ if(openMenuEl){ openMenuEl.remove(); openMenuEl=null; document.removeEventListener('click',onDocMenuClick,true); document.removeEventListener('keydown',onMenuKey,true); } }
@@ -1062,17 +1251,25 @@ function openActionMenu(anchor, items){
 
 function attHtml(a){
   const type=a.type||'';
+  const data = `data-ref="${a.ref?esc(a.ref):''}" ${a.local?`data-local="${esc(a.local)}"`:''} ${a.uploading?'data-uploading="1"':''}`;
+  const spin = a.uploading?'<div class="uploading"><span class="ring"></span></div>':'';
   if(type.startsWith('audio/')){
-    return `<div class="att voice" data-ref="${esc(a.ref)}" data-audio="1">
-      <button class="vplay">${I.play}</button>
+    return `<div class="att voice" ${data} data-audio="1">
+      <button class="vplay">${a.uploading?'':I.play}</button>
       <div class="vbar"><div class="vfill"></div></div>
-      <span class="vtime">${a.dur?fmtDur(a.dur):'voice'}</span>
+      <span class="vtime">${a.uploading?'sending…':(a.dur?fmtDur(a.dur):'voice')}</span>
+      ${spin}
     </div>`;
   }
-  const isImg=type.startsWith('image/');
-  return `<div class="att" data-ref="${esc(a.ref)}" data-img="${isImg?1:0}">
+  if(type.startsWith('image/')){
+    return `<div class="att image" ${data} data-img="1">
+      <div class="imgwrap"></div>${spin}
+    </div>`;
+  }
+  return `<div class="att" ${data} data-name="${esc(a.name||'file')}" data-mime="${esc(a.type||'application/octet-stream')}">
     <div class="ico">${I.file}</div>
-    <div class="ai"><b>${esc(a.name)}</b><span>${fmtSize(a.size)}</span></div>
+    <div class="ai"><b>${esc(a.name)}</b><span>${a.uploading?'sending…':fmtSize(a.size)}</span></div>
+    ${spin}
   </div>`;
 }
 function fmtDur(s){const m=Math.floor(s/60),x=Math.floor(s%60);return m+':'+String(x).padStart(2,'0');}
@@ -1084,7 +1281,7 @@ function initAudioPlayer(el){
   async function ensure(){
     if(audio||loading)return;
     loading=true;
-    try{ const url=await Store.fileUrl(el.dataset.ref); audio=new Audio(url);
+    try{ const url=el.dataset.local || await Store.fileUrl(el.dataset.ref); audio=new Audio(url);
       audio.ontimeupdate=()=>{ if(audio.duration){fill.style.width=(audio.currentTime/audio.duration*100)+'%'; time.textContent=fmtDur(audio.currentTime);} };
       audio.onended=()=>{ playBtn.innerHTML=I.play; fill.style.width='0%'; if(audio.duration)time.textContent=fmtDur(audio.duration); };
       audio.onloadedmetadata=()=>{ if(isFinite(audio.duration))time.textContent=fmtDur(audio.duration); };
@@ -1098,65 +1295,62 @@ function initAudioPlayer(el){
   };
 }
 
-// ---------- text-to-speech (read aloud) ----------
-let ttsActive=null;
-function speak(text,btn){
-  if(!('speechSynthesis'in window)){ alert('This browser can’t read text aloud.'); return; }
-  if(ttsActive){ speechSynthesis.cancel(); const prev=ttsActive.btn; ttsActive=null; if(prev)prev.innerHTML=I.speaker; if(prev===btn)return; }
+// ---------- text-to-speech (read aloud) with a stop control ----------
+let ttsActive=false;
+function speak(text){
+  if(!('speechSynthesis'in window)){ toast('This browser can’t read text aloud.'); return; }
+  if(ttsActive){ stopSpeaking(); return; }      // tapping again stops
   const u=new SpeechSynthesisUtterance(text);
-  u.onend=()=>{ if(btn)btn.innerHTML=I.speaker; ttsActive=null; };
-  ttsActive={btn}; if(btn)btn.innerHTML=I.stop;
+  u.onend=stopSpeaking; u.onerror=stopSpeaking;
+  ttsActive=true; showTtsPill();
   speechSynthesis.speak(u);
 }
+function stopSpeaking(){ try{speechSynthesis.cancel();}catch(e){} ttsActive=false; const p=$('#ttsPill'); if(p)p.classList.remove('on'); }
+function showTtsPill(){
+  let p=$('#ttsPill');
+  if(!p){ p=document.createElement('button'); p.id='ttsPill'; p.className='tts-pill'; p.innerHTML=`${I.stop}<span>Stop reading</span>`; p.onclick=stopSpeaking; document.body.appendChild(p); }
+  p.classList.add('on');
+}
 
-// ---------- voice notes (record + optional live transcription) ----------
-let mediaRec=null, recChunks=[], recStart=0, recTimer=null, recognizer=null, recTranscript='';
+// ---------- voice notes (record + playback) ----------
+let mediaRec=null, recChunks=[], recStart=0, recTimer=null;
 async function startRecording(){
-  if(!navigator.mediaDevices?.getUserMedia){ alert('Recording isn’t supported here.'); return; }
+  if(!navigator.mediaDevices?.getUserMedia){ toast('Recording isn’t supported here.'); return; }
   let stream;
   try{ stream=await navigator.mediaDevices.getUserMedia({audio:true}); }
-  catch(e){ alert('Microphone permission is needed to record.'); return; }
-  recChunks=[]; recTranscript='';
+  catch(e){ toast('Microphone permission is needed to record.'); return; }
+  recChunks=[];
   mediaRec=new MediaRecorder(stream);
   mediaRec.ondataavailable=e=>{ if(e.data.size)recChunks.push(e.data); };
   mediaRec.onstop=()=>{ stream.getTracks().forEach(t=>t.stop()); finishRecording(); };
   mediaRec.start();
   recStart=Date.now();
-  // best-effort live transcription
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(SR){ try{ recognizer=new SR(); recognizer.continuous=true; recognizer.interimResults=false; recognizer.lang=navigator.language||'en-US';
-    recognizer.onresult=e=>{ for(let i=e.resultIndex;i<e.results.length;i++){ if(e.results[i].isFinal)recTranscript+=e.results[i][0].transcript+' '; } };
-    recognizer.onerror=()=>{}; recognizer.start(); }catch(e){ recognizer=null; } }
   showRecordingUI();
 }
 function showRecordingUI(){
   const bar=$('#inbar'); if(!bar)return;
   bar.innerHTML=`<button class="attach cancelrec" id="cancelRec" title="Discard">${I.trash}</button>
     <div class="recwrap"><span class="recdot"></span><span class="rectime" id="recTime">0:00</span>
-      <span class="rechint">recording${recognizer?' · transcribing':''}…</span></div>
+      <span class="rechint">recording…</span></div>
     <button class="send" id="stopRec" title="Stop and attach">${I.stop}</button>`;
   $('#cancelRec').onclick=()=>cancelRecording();
-  $('#stopRec').onclick=()=>{ if(mediaRec&&mediaRec.state!=='inactive')mediaRec.stop(); if(recognizer)try{recognizer.stop();}catch(e){} };
+  $('#stopRec').onclick=()=>{ if(mediaRec&&mediaRec.state!=='inactive')mediaRec.stop(); };
   recTimer=setInterval(()=>{ const t=Math.floor((Date.now()-recStart)/1000); const el=$('#recTime'); if(el)el.textContent=fmtDur(t); },300);
 }
 function cancelRecording(){
   if(mediaRec&&mediaRec.state!=='inactive'){ mediaRec.onstop=()=>mediaRec.stream?.getTracks().forEach(t=>t.stop()); mediaRec.stop(); }
-  if(recognizer)try{recognizer.stop();}catch(e){}
-  clearInterval(recTimer); mediaRec=null; recChunks=[]; recTranscript='';
+  clearInterval(recTimer); mediaRec=null; recChunks=[];
   renderMain();
 }
 async function finishRecording(){
   clearInterval(recTimer);
-  if(recognizer)try{recognizer.stop();}catch(e){} recognizer=null;
   const dur=Math.round((Date.now()-recStart)/1000);
   const blob=new Blob(recChunks,{type:'audio/webm'});
   const file=new File([blob],'Voice note.webm',{type:'audio/webm'});
-  file._dur=dur;                       // carry duration for the chip/player
+  file._dur=dur;
   pending.push(file);
   mediaRec=null;
-  renderMain();                        // rebuild composer in normal state
-  const input=$('#input');
-  if(recTranscript.trim() && input){ input.value=recTranscript.trim(); input.dispatchEvent(new Event('input')); }
+  renderMain();
   renderPending();
 }
 
@@ -1183,19 +1377,36 @@ function openThread(id){
 async function doSend(){
   const input=$('#input'); const text=input.value.trim();
   if(!text && !pending.length)return;
-  const atts=[];
-  for(const f of pending){
-    try{ const ref=await Store.putFile(f); atts.push({name:f.name,size:f.size,type:f.type,ref,dur:f._dur||0}); }
-    catch(e){ alert('Attachment failed: '+e.message); }
-  }
+  const files=pending.slice();
+  // build attachments with instant local previews; uploads happen after the message shows
+  const atts=files.map(f=>({
+    name:f.name, size:f.size, type:f.type, dur:f._dur||0,
+    ref:null, uploading:true, local:URL.createObjectURL(f), _file:f
+  }));
   const msg={id:uid(),text,ts:Date.now(),pinned:false,attachments:atts};
   if(stagedQuote){ msg.quote=stagedQuote; stagedQuote=null; renderReplyBar(); }
-  (state.messages[state.activeId] ||= []).push(msg);
-  const t=state.threads.find(x=>x.id===state.activeId); if(t)t.lastActivity=Date.now();
+  const threadId=state.activeId;
+  (state.messages[threadId] ||= []).push(msg);
+  const t=state.threads.find(x=>x.id===threadId); if(t)t.lastActivity=Date.now();
   pending=[]; input.value=''; input.style.height='auto';
-  renderStream(); renderPending(); renderThreads(); persist();
+  renderStream(); renderPending(); renderThreads();
   const last=document.querySelector('#stream .msg:last-child'); if(last)last.classList.add('appear');
   $('#sendBtn').disabled=true;
+  input.focus();                          // keep the keyboard up for the next message
+  persist();                              // saves text immediately (uploading attachments are held back until done)
+  // upload attachments in the background, then swap in the Drive reference
+  atts.forEach(async a=>{
+    try{
+      a.ref=await Store.putFile(a._file);
+      a.uploading=false;
+      if(state.activeId===threadId) renderStream();
+      persist();
+    }catch(e){
+      a.uploading=false; a.error=true;
+      if(state.activeId===threadId) renderStream();
+      toast('Upload failed: '+a.name);
+    }
+  });
 }
 
 /* ---------- reply / cross-thread quote ---------- */
@@ -1241,6 +1452,51 @@ function deleteMsg(id){
   const arr=state.messages[state.activeId];
   const i=arr.findIndex(m=>m.id===id);
   if(i>-1){arr.splice(i,1);renderStream();renderThreads();persist();}
+}
+
+/* ---------- batch select / delete / forward ---------- */
+function enterSelect(id){ selectMode=true; selected=new Set(id?[id]:[]); renderMain(); }
+function exitSelect(){ selectMode=false; selected.clear(); renderMain(); }
+function toggleSelect(id){ if(selected.has(id))selected.delete(id); else selected.add(id); renderMain(); }
+function deleteSelected(){
+  if(!selected.size)return;
+  const arr=state.messages[state.activeId]||[];
+  state.messages[state.activeId]=arr.filter(m=>!selected.has(m.id));
+  exitSelect(); renderThreads(); persist();
+  toast('Deleted');
+}
+function forwardSelected(){
+  if(!selected.size)return;
+  const arr=state.messages[state.activeId]||[];
+  const chosen=arr.filter(m=>selected.has(m.id));
+  const opts=state.threads.filter(t=>t.id!==state.activeId).map(t=>({id:t.id,label:t.name}));
+  if(!opts.length){ toast('No other thread to forward to'); return; }
+  pickThread('Forward '+selected.size+' message'+(selected.size>1?'s':'')+' to…',opts,destId=>{
+    const dest=(state.messages[destId] ||= []);
+    chosen.forEach(m=>dest.push({
+      id:uid(), text:m.text||'', ts:Date.now(), pinned:false,
+      attachments:(m.attachments||[]).filter(a=>a.ref).map(a=>({name:a.name,size:a.size,type:a.type,dur:a.dur||0,ref:a.ref})),
+    }));
+    const dt=state.threads.find(x=>x.id===destId); if(dt)dt.lastActivity=Date.now();
+    exitSelect(); renderThreads(); persist();
+    toast('Forwarded');
+  });
+}
+
+/* ---------- thread subtitle ---------- */
+function editSubtitle(t){
+  dialog({ title:'Thread subtitle', hint:'A short note under the thread name. Leave blank to remove.',
+    value:t.subtitle||'', ok:'Save', run:(v)=>{ t.subtitle=(v||'').trim(); renderMain(); persist(); } });
+}
+
+/* ---------- checklist insert ---------- */
+function insertChecklistItem(input,refresh){
+  const v=input.value;
+  const needsNL = v.length && !v.endsWith('\n');
+  input.value = v + (needsNL?'\n':'') + '[ ] ';
+  input.focus();
+  input.setSelectionRange(input.value.length,input.value.length);
+  refresh();
 }
 
 /* ---------- file picker ---------- */
